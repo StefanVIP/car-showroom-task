@@ -9,6 +9,7 @@ use Doctrine\ORM\Mapping as ORM;
 
 /**
  * @ORM\Entity(repositoryClass="App\Repository\CreditRequestRepository")
+ * @ORM\Table(name="credit_requests")
  * @ORM\HasLifecycleCallbacks
  */
 class CreditRequest

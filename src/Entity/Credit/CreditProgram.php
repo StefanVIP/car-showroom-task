@@ -6,7 +6,10 @@ namespace App\Entity\Credit;
 
 use Doctrine\ORM\Mapping as ORM;
 
-/** @ORM\Entity(repositoryClass="App\Repository\CreditProgramRepository") */
+/**
+ * @ORM\Entity(repositoryClass="App\Repository\CreditProgramRepository")
+ * @ORM\Table(name="credit_programs")
+ */
 class CreditProgram
 {
     /**
@@ -24,7 +27,7 @@ class CreditProgram
     private string $title;
 
     /**
-     * @ORM\Column(type="float")
+     * @ORM\Column(type="decimal", precision=5, scale=1)
      * @var float
      */
     private float $interestRate;

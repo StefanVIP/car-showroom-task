@@ -43,6 +43,7 @@ class ExceptionSubscriber implements EventSubscriberInterface
         $response = new JsonResponse([
             'success' => false,
             'message' => 'Произошла внутренняя ошибка сервера.',
+            'originalMessage' => $exception->getMessage(),
         ], 500);
         $event->setResponse($response);
     }

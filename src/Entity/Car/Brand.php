@@ -6,7 +6,10 @@ namespace App\Entity\Car;
 
 use Doctrine\ORM\Mapping as ORM;
 
-/** @ORM\Entity(repositoryClass="App\Repository\BrandRepository") */
+/**
+ * @ORM\Entity(repositoryClass="App\Repository\BrandRepository")
+ * @ORM\Table(name="brands")
+ */
 class Brand
 {
     /**
