@@ -1,0 +1,14 @@
+parameters:
+  app.env: '%env(APP_ENV)%'
+  app.name: 'core'
+  app.secret: '%env(APP_SECRET)%'
+
+  db.mysql.host: '%env(APP_MYSQL_HOST)%'
+  db.mysql.port: '%env(APP_MYSQL_PORT)%'
+  db.mysql.user: '%env(APP_MYSQL_USER)%'
+  db.mysql.password: '%env(APP_MYSQL_PASS)%'
+  db.mysql.dbname: '%env(APP_MYSQL_DB)%'
+
+  appEnv.dev: 'dev'
+  appEnv.test: 'test'
+

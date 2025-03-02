@@ -1,0 +1,48 @@
+services:
+  php:
+    build:
+      context: ../
+      target: php-fpm-nginx-dev
+      dockerfile: docker/php-fpm-nginx/Dockerfile
+    environment:
+      XDEBUG_SESSION: "PHPSTORM"
+      XDEBUG_CONFIG: "client_host=${XDEBUG_REMOTE_HOST}"
+      PHP_MEMORY_LIMIT: 512M
+    restart: on-failure
+    networks:
+      - car_showroom
+    ports:
+      - "80:8080"
+    volumes:
+      - ./..:/var/www/html:delegated
+    depends_on:
+      - mysql
+
+  mysql:
+    image: mysql:8.0
+    restart: on-failure
+    container_name: mysql
+    networks:
+      - car_showroom
+    volumes:
+      - mysql_data:/var/lib/mysql
+      - mysql_logs:/var/log/mysql
+    environment:
+      MYSQL_DATABASE: ${MYSQL_DATABASE}
+      MYSQL_USER: ${MYSQL_USER}
+      MYSQL_PASSWORD: ${MYSQL_PASSWORD}
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
+    ports:
+      - ${MYSQL_PORT}:3306
+    healthcheck:
+      test: [ "CMD", "mysqladmin" ,"ping", "-h", "localhost" ]
+      timeout: 20s
+      retries: 10
+
+networks:
+  car_showroom:
+    driver: bridge
+
+volumes:
+  mysql_data:
+  mysql_logs:
