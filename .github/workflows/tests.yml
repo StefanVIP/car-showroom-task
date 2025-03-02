@@ -10,10 +10,8 @@ jobs:
       mysql:
         image: mysql:8.0
         env:
-          MYSQL_DATABASE: test_db
-          MYSQL_USER: user
-          MYSQL_PASSWORD: password
-          MYSQL_ROOT_PASSWORD: root_password
+          MYSQL_DATABASE: car_showroom
+          MYSQL_ROOT_PASSWORD: root
         ports:
           - 3306:3306
         options: --health-cmd="mysqladmin ping" --health-interval=10s --health-timeout=5s --health-retries=3
@@ -29,6 +27,11 @@ jobs:
           extensions: ctype, iconv, json, pdo_mysql
           coverage: none
 
+      - name: Install MySQL client
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y mysql-client
+
       - name: Install dependencies
         run: |
           composer install --prefer-dist --no-progress --no-interaction
@@ -36,7 +39,47 @@ jobs:
       - name: Prepare environment
         run: |
           cp .env.test .env
+          sed -i '/DATABASE_URL=/d' .env
           echo "DATABASE_URL=mysql://root:root@127.0.0.1:3306/car_showroom" >> .env
+          echo "APP_MYSQL_HOST=127.0.0.1" >> .env
+          echo "APP_MYSQL_PORT=3306" >> .env
+          echo "APP_MYSQL_USER=root" >> .env
+          echo "APP_MYSQL_PASS=root" >> .env
+          echo "APP_MYSQL_DB=car_showroom" >> .env
+          php bin/console cache:clear --env=test
+
+      - name: Wait for MySQL to be ready
+        run: |
+          for i in {1..30}; do
+            if mysql -h 127.0.0.1 -u root -proot -e "SELECT 1" > /dev/null 2>&1; then
+              echo "MySQL is ready"
+              exit 0
+            fi
+            echo "Waiting for MySQL..."
+            sleep 2
+          done
+          echo "MySQL is not ready after 60 seconds" && exit 1
+
+      - name: Run migrations
+        run: |
+          php bin/console doctrine:migrations:migrate --no-interaction --verbose
+
+      - name: Run fixture
+        run: |
+          php bin/console doctrine:fixtures:load --no-interaction --append
+
+      - name: Verify MySQL connection before tests
+        run: |
+          for i in {1..10}; do
+            if mysql -h 127.0.0.1 -u root -proot -e "SELECT 1" > /dev/null 2>&1; then
+              echo "MySQL is still available"
+              exit 0
+            fi
+            echo "Waiting for MySQL to be available..."
+            sleep 1
+          done
+          echo "MySQL is not available before tests" && exit 1
 
       - name: Run PHPUnit Tests
         run: composer test
+          cat var/log/test.log || echo "No test log found"
